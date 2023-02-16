@@ -5,26 +5,21 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Krypto.Operace
+namespace Krypto.Operations.Crypto_Operations
 {
-    public class Operations
+    public class CryptoOperations
     {
 
-        private long modulo;
-        private long Phi_m;
         private Intermediaries intern;
 
-
-        public Operations(int modulo)
+        public CryptoOperations()
         {
-            Initialization(modulo);
+            Initialization();
         }
 
-        private void Initialization(int modulo)
+        private void Initialization()
         {
-            this.modulo = modulo;
             this.intern = new Intermediaries();
-            this.Phi_m = intern.EulerPhi(modulo);
         }
 
         public BigInteger BabyStepGiantStep(BigInteger modulo, BigInteger generator, BigInteger b)
@@ -58,6 +53,45 @@ namespace Krypto.Operace
                 }
             }
             return 0;
+        }
+
+        public BigInteger FindGenerator(BigInteger modulus)
+        {
+            var rand = new Random();
+            bool flag = true;
+
+            BigInteger temp;
+            BigInteger potentialGenerator = 1;
+
+            for (BigInteger i = 0; (i < modulus - 1) && flag; i++)
+            {
+                potentialGenerator = rand.NextInt64(2, (long)modulus);
+
+                for (BigInteger j = 1; j < modulus ; j++)
+                {
+                    temp = intern.PowMod(potentialGenerator, j, modulus);
+                    if (temp ==1 && (j != (modulus - 1)))
+                    {
+                        break;
+                    }
+
+                    if (temp == 1 && j == (modulus - 1))
+                    {
+                        flag = false;
+                        break;
+                    }
+                
+                }
+            }
+
+            /* Check
+            for (BigInteger i = 1; (i < modulus); i++)
+            {
+                Console.WriteLine(intern.PowMod(potentialGenerator, i, modulus));
+            }
+            */
+
+            return potentialGenerator;
         }
 
 
