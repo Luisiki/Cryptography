@@ -14,7 +14,7 @@ namespace Krypto.Krypto // Note: actual namespace depends on the project name.
             Console.WriteLine(operace.BabyStepGiantStep(37, 2, 7));
 
             watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
+            var elapsedMs = watch.ElapsedTicks/(TimeSpan.TicksPerMillisecond / 1000);
             Console.WriteLine(elapsedMs);
         }
     }
