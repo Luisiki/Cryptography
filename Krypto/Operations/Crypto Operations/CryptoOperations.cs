@@ -94,6 +94,10 @@ namespace Krypto.Operations.Crypto_Operations
             return potentialGenerator;
         }
 
+        public BigInteger powMod(BigInteger x, BigInteger y, BigInteger modulo)
+        {
+            return (intern.PowMod(x, y, modulo));
+        }
 
 
 
