@@ -121,6 +121,18 @@ namespace Krypto.Operations.Crypto_Operations
             return ((modulus1 - 1) * (modulus2 - 1));
         }
 
+        public static BigInteger Sqrt(BigInteger n)
+        {
+            if (n == 0) return 0;
+            BigInteger x = n / 2 + 1;
+            BigInteger y = (x + n / x) / 2;
+            while (y < x)
+            {
+                x = y;
+                y = (x + n / x) / 2;
+            }
+            return x;
+        }
 
 
         /// <summary>
