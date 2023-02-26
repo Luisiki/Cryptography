@@ -13,15 +13,13 @@ namespace Krypto.Krypto // Note: actual namespace depends on the project name.
         {
             CryptoOperations cryptoOperations = new CryptoOperations();
             FileOperations fileOperations = new FileOperations();
-            /*
-            
-            Console.WriteLine(cryptoOperations.BabyStepGiantStep(37, 2, 7));
+
             var watch = System.Diagnostics.Stopwatch.StartNew();
             watch.Stop();
-            var elapsedMs = watch.ElapsedTicks/(TimeSpan.TicksPerMillisecond / 1000);
-            Console.WriteLine(elapsedMs);
-            */
-
+            var elapsedMs = watch.ElapsedMilliseconds;
+            Console.WriteLine(elapsedMs + "ms");
+            
+            /*
             BigInteger[] primes = fileOperations.readFileNumbers("/Files/", "primes.txt");
             BigInteger[] generators = fileOperations.readFileNumbers("/Files/", "generators.txt");
             var rand = new Random();
@@ -33,7 +31,7 @@ namespace Krypto.Krypto // Note: actual namespace depends on the project name.
                                   cryptoOperations.BabyStepGiantStep(primes[i], generators[i], temp) + " = " + temp);
                 Console.WriteLine("a = " + generators[i] + ", b = " + temp + ", modulo = " + primes[i]);
             }
-
+            */
 
 
         }
