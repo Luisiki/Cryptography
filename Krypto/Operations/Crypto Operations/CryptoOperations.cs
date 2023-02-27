@@ -7,6 +7,21 @@ using System.Threading.Tasks;
 
 namespace Krypto.Operations.Crypto_Operations
 {
+    public enum GeneratorSearch : ushort
+    {
+        Brute = 1,
+        PollardRho = 2,
+        IndexCalculator = 3,
+        IndexCandidates = 4
+    }
+
+    public enum EulerPhiSelection : ushort
+    {
+        Brute = 1,
+        Mobius = 2,
+        Classic = 3
+    }
+
     public class CryptoOperations
     {
 
@@ -55,7 +70,8 @@ namespace Krypto.Operations.Crypto_Operations
             return 0;
         }
 
-        public BigInteger FindGenerator(BigInteger modulus)
+
+        private BigInteger FindGenerator(BigInteger modulus)
         {
             var rand = new Random();
             bool flag = true;
@@ -209,10 +225,13 @@ namespace Krypto.Operations.Crypto_Operations
 
         private BigInteger[] pollard(BigInteger input, BigInteger modulo)
         {
-            BigInteger x, y, z;
+            BigInteger x, y;
             BigInteger c, d = 1;
 
-
+            if (input % 2 == 0)
+            {
+                return new BigInteger[] { 2, modulo / 2 };
+            }
 
             x = intern.getRandomBigInteger(2, input - 1);
             y = x;
@@ -330,6 +349,7 @@ namespace Krypto.Operations.Crypto_Operations
         {
             return (intern.PowMod(x, 2, n) + c) % n;
         }
+
         /// <summary>
         /// 2x + d mod n
         /// </summary>
@@ -342,8 +362,147 @@ namespace Krypto.Operations.Crypto_Operations
             return ((x << 1) + d) % n;
         }
 
+        /// <summary>
+        /// finds one Cyclic group generator, searchType specifies which algorithm you want to use
+        /// </summary>
+        /// <param name="modulus"></param>
+        /// <param name="searchType"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public BigInteger getGenerator(BigInteger modulus, GeneratorSearch searchType)
+        {
+            switch (searchType)
+            {
+                case GeneratorSearch.Brute:
+                    return FindGenerator(modulus);
+                case GeneratorSearch.PollardRho:
+                    return pollardGenerator(modulus);
+                case GeneratorSearch.IndexCalculator:
+                    break;
+                case GeneratorSearch.IndexCandidates:
+                    break;
+                default:
+                    throw new ArgumentException();
+            }
 
 
+
+            return -1;
+        }
+
+        public BigInteger pollardGenerator(BigInteger modulus)
+        {
+            BigInteger generator = intern.getRandomBigInteger(2, modulus - 1);
+            BigInteger[] primes = pollardRho(eulerPhi(modulus,EulerPhiSelection.Mobius));
+            Array.Sort(primes);
+
+            for (int i = 1; i < primes.Length; i++)
+            {
+                if (intern.PowMod(generator, i, modulus) != 1)
+                {
+                    generator = intern.getRandomBigInteger(2, modulus - 1);
+                    while ((BigInteger.GreatestCommonDivisor(generator, modulus) != 1))
+                    {
+                        generator = intern.getRandomBigInteger(2, modulus - 1);
+                    }
+                }
+            }
+
+
+            return generator;
+        }
+
+        public BigInteger eulerPhi(BigInteger modulus, EulerPhiSelection selection)
+        {
+            switch (selection)
+            {
+                case EulerPhiSelection.Brute:
+                    return eulerPhiBrute(modulus);
+                case EulerPhiSelection.Mobius:
+                    return eulerPhiMobius(modulus);
+                case EulerPhiSelection.Classic:
+                    break;
+                default:
+                    return -1;
+            }
+            return -1;
+        }
+
+        private BigInteger eulerPhiBrute(BigInteger modulus)
+        {
+            BigInteger res = modulus - 1;
+
+            for (BigInteger i = 2; i < modulus; i++)
+            {
+                if (modulus % i == 0)
+                {
+                    res--;
+                }
+            }
+
+            return res;
+        }
+
+
+        private BigInteger eulerPhiMobius(BigInteger modulus)
+        {
+            BigInteger[] primes = pollardRho(modulus);
+            if (modulus == primes[0])
+            {
+                return modulus - 1;
+            }
+
+            BigInteger result = 0;
+
+            for (int i = 1; i <= modulus; i++)
+            {
+                if (modulus % i == 0)
+                {
+                    result += mobiusFunction(i) * modulus / i;
+                }
+            }
+            return result;
+        }
+         
+        private BigInteger mobiusFunction(BigInteger n)
+        {
+            if (n == 1)
+            {
+                return 1;
+            }
+            BigInteger[] factors = pollardRho(n);
+
+
+            if (!isWithoutSquares(factors))
+            {
+                return 0;
+            }
+
+            if (factors.Length % 2 == 1)
+            {
+                return -1;
+            }
+
+            return 1;
+        }
+
+        /// <summary>
+        /// Möbius function
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        private bool isWithoutSquares(BigInteger[] primeFactors)
+        {
+            var hashSet = new HashSet<BigInteger>();
+            foreach (var value in primeFactors)
+            {
+                if (!hashSet.Add(value))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
 
 
     }
@@ -351,16 +510,6 @@ namespace Krypto.Operations.Crypto_Operations
     internal class Intermediaries
     {
         private static Random random = new Random();
-
-        public long EulerPhi(long modulus)
-        {
-            return modulus - 1;
-        }
-
-        public long EulerPhi(long modulus1, long modulus2)
-        {
-            return ((modulus1 - 1) * (modulus2 - 1));
-        }
 
         public static BigInteger Sqrt(BigInteger n)
         {

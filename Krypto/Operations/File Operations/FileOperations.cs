@@ -62,7 +62,10 @@ namespace Krypto.Operations.File_Operations
         }
 
 
-        
+        public String get_dir()
+        {
+            return _dir;
+        }
 
 
 
