@@ -1,1 +1,3 @@
 # Krypto
+
+$\varphi(n)$
