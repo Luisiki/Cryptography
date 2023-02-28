@@ -3,7 +3,7 @@ This is a hobby project, where I try to learn and program cryptographic function
 
 Every function is designed to be able to work with BigInteger type meaning it should be able to work with really large numbers.
 
-\chapter{Factorization}
+\section{Factorization}
 
 
-\chapter{Traditional cryptographic functions}
+\section{Traditional cryptographic functions}
