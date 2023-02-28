@@ -3,6 +3,8 @@ This is a hobby project, where I try to learn and program cryptographic function
 
 Every function is designed to be able to work with BigInteger type meaning it should be able to work with really large numbers.
 
+Everything is coded in C# on .NET versions 7.0
+
 # Factorization
 A big thing I try to focus on is factorization.
 The implemented, or to be implemented, algortihms for this are:
