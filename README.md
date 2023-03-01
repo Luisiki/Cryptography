@@ -19,8 +19,8 @@ The implemented, or to be implemented, algortihms for this are:
 Euler's totient function $\varphi(n)$:
 
 1. Brute force i.e. try all numbers $a$ if $a|n$, where $a < n$ 🟢
-2. Möbius function approach $\varphi(n) = \sum(\mu(n)*\frac{n}{d})$, for all $d$ to $n$ 🟠 (has a 40% error rate without any reason, needs to be fixed),
-3. Classical $\varphi(n) = \prod(p_i-1)^{k_i-1}$, where $n = p_1^{k_1}\cdot p_2^{k_2} ... p_i^{k_i}$. 🔴 
+2. Möbius function approach $\varphi(n) = \sum(\mu(n)*\frac{n}{d})$, for all $d$ to $n$, where $d|n$ 🟠 (has a 8% error rate without any reason, needs to be fixed),
+3. Classical $\varphi(n) = \prod(p_i-1)\cdot p_i^{k_i-1}$, where $n = p_1^{k_1}\cdot p_2^{k_2} ... p_i^{k_i}$. 🔴 
 
 Primality tests:
 
