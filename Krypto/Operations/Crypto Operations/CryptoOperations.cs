@@ -22,6 +22,14 @@ namespace Krypto.Operations.Crypto_Operations
         Classic = 3
     }
 
+    public enum FactorizationSelection : ushort
+    {
+        Brute = 1,
+        PollarRho = 2,
+        BabyStepGiantStep = 3,
+        LenstraEllipticCurveFactorization = 4
+    }
+
     public class CryptoOperations
     {
 
@@ -459,6 +467,7 @@ namespace Krypto.Operations.Crypto_Operations
                 if (modulus % i == 0)
                 {
                     result += mobiusFunction(i) * modulus / i;
+                    Console.WriteLine(mobiusFunction(i) + " " + i );
                 }
             }
             return result;
@@ -470,6 +479,7 @@ namespace Krypto.Operations.Crypto_Operations
             {
                 return 1;
             }
+
             BigInteger[] factors = pollardRho(n);
 
 
@@ -493,17 +503,133 @@ namespace Krypto.Operations.Crypto_Operations
         /// <returns></returns>
         private bool isWithoutSquares(BigInteger[] primeFactors)
         {
-            var hashSet = new HashSet<BigInteger>();
-            foreach (var value in primeFactors)
+            List<BigInteger> list = new List<BigInteger>(primeFactors);
+            var hashSet = new HashSet<BigInteger>(list);
+            if (list.Count == hashSet.Count)
             {
-                if (!hashSet.Add(value))
-                {
-                    return false;
-                }
+                return true;
             }
-            return true;
+
+            return false;
         }
 
+
+        private struct Point
+        {
+            public BigInteger x;
+            public BigInteger y;
+
+            public static Point pointAddition(Point point, EllpticCurve curve)
+            {
+                Point result = new Point();
+
+                BigInteger s = (3 * point.x * point.x + curve.a) *
+                               Intermediaries.PoMod(2 * point.y, curve.modulo - 2, curve.modulo);
+                
+
+                result.x = (s*s - point.x - point.x) % curve.modulo;
+                result.y = (s*(point.x  - result.x) - point.y) % curve.modulo;
+
+                return result;
+            }
+        }
+
+        private struct EllpticCurve
+        {
+            public BigInteger a, b, modulo;
+
+        }
+
+        public BigInteger[] LECF(BigInteger modulus)
+        {
+            List<BigInteger> list = new List<BigInteger>();
+            int numberOfIterations = 0;
+            while (modulus !=1 )
+            {
+                list.Add(LenstraEllipticCurveFactorization(modulus));
+                numberOfIterations++;
+                if (list[list.Count-1] == -1)
+                {
+                    list.RemoveAt(list.Count-1);
+                }
+                else
+                {
+                    modulus /= list[list.Count - 1];
+                }
+
+                if (numberOfIterations > 500)
+                {
+                    if (MillerRabin(modulus, 1000))
+                    {
+                        list.Add(modulus);
+                        modulus /= modulus;
+                    }
+                }
+                
+
+                
+            }
+
+            BigInteger[] result = new BigInteger[list.Count];
+            for (int i = 0; i < list.Count; i++)
+            {
+                result[i] = (BigInteger)list[i];
+            }
+            return result;
+        }
+        
+
+        public BigInteger LenstraEllipticCurveFactorization(BigInteger modulus)
+        {
+            Point P0 = new Point();
+            P0.x = intern.getRandomBigInteger(1, modulus - 1);
+            P0.y = intern.getRandomBigInteger(1, modulus - 1);
+
+            EllpticCurve E = new EllpticCurve();
+            E.a = intern.getRandomBigInteger(1, modulus - 1);
+
+            //b = y^2-x0^3-a*x0
+            E.b = intern.getRandomBigInteger(1, modulus - 1);
+            //(P0.y * P0.y - P0.x * P0.x * P0.x - E.a * P0.x) % modulus;
+            E.modulo = modulus;
+
+            List<Point> points = new List<Point>();
+
+            points.Add(P0);
+
+            BigInteger d = 0;
+            for (int i = 1; i < 100000; i++)
+            {
+                points.Add(Point.pointAddition(points[i - 1], E));
+
+                d = BigInteger.GreatestCommonDivisor(modulus, points[i - 1].y);
+
+                if (d > 1 && d < modulus)
+                {
+                    return d;
+                }
+            }
+            
+            return -1;
+        }
+
+        public BigInteger[] Factorization(BigInteger n, FactorizationSelection selection)
+        {
+            switch (selection)
+            {
+                case FactorizationSelection.Brute:
+                    break;
+                case FactorizationSelection.PollarRho:
+                    return pollardRho(n);
+                case FactorizationSelection.BabyStepGiantStep:
+                    return new BigInteger[] { };
+                case FactorizationSelection.LenstraEllipticCurveFactorization:
+                    return LECF(n);
+                default:
+                    break;
+            }
+            return new BigInteger[] { };
+        }
 
     }
 
@@ -533,6 +659,16 @@ namespace Krypto.Operations.Crypto_Operations
         /// <param name="p">modulus</param>
         /// <returns></returns>
         public BigInteger PowMod(BigInteger x, BigInteger y, BigInteger p)
+        {
+            if (y < (BigInteger)0)
+            {
+                y = p + y;
+            }
+
+            return (PMod((BigInteger)x, (BigInteger)y, (BigInteger)p));
+        }
+
+        public static BigInteger PoMod(BigInteger x, BigInteger y, BigInteger p)
         {
             if (y < (BigInteger)0)
             {

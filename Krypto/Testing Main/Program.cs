@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
+using System.Reflection.Metadata;
 using Krypto.Operations.Crypto_Operations;
 using Krypto.Operations.File_Operations;
 using Microsoft.VisualBasic.CompilerServices;
+
 
 namespace Krypto.Krypto // Note: actual namespace depends on the project name.
 {
@@ -20,54 +22,14 @@ namespace Krypto.Krypto // Note: actual namespace depends on the project name.
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs + "ms");
-            BigInteger modulus = 10;
+            BigInteger modulus = 630;
+            BigInteger[] res = (cryptoOperations.Factorization(modulus,
+                FactorizationSelection.LenstraEllipticCurveFactorization));
 
-
-            List<BigInteger> brutes = new List<BigInteger>();
-            while (modulus < 1001)
+            for (int i = 0; i < res.Length; i++)
             {
-                brutes.Add(cryptoOperations.eulerPhi(modulus, EulerPhiSelection.Brute));
-                modulus++;
+                Console.Write(res[i]+", ");
             }
-            /*
-            modulus = 10;
-            List<BigInteger> mobiuses = new List<BigInteger>();
-            while (modulus < 1001)
-            {
-                mobiuses.Add(cryptoOperations.eulerPhi(modulus, EulerPhiSelection.Mobius));
-                modulus++;
-            }
-            */
-
-            modulus = 10;
-            var hashSet = new HashSet<BigInteger>();
-            String errors = "";
-            String modulusErrors="";
-            /*
-            foreach (var value in mobiuses)
-            {
-                if (!hashSet.Add(value))
-                {
-                    errors += value + ",";
-                    modulusErrors += modulus + ",";
-                }
-
-                modulus++;
-            }*/
-            String brutess = "";
-            foreach (var VARIABLE in brutes)
-            {
-                brutess += VARIABLE + ",";
-            }
-
-            //fileOperations.saveToFile("/Files/", "error_outputs.txt", errors);
-            //fileOperations.saveToFile("/Files/", "modulus_Errors.txt", modulusErrors);
-            fileOperations.saveToFile("/Files/", "correct_values.txt", brutess);
-
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = fileOperations.get_dir(),
-            };
 
 
             //BigInteger tmp = cryptoOperations.getGenerator(modulus, GeneratorSearch.PollardRho);
