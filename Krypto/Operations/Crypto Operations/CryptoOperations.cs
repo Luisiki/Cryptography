@@ -434,7 +434,7 @@ namespace Krypto.Operations.Crypto_Operations
 
             for (BigInteger i = 2; i < modulus; i++)
             {
-                if (modulus % i == 0)
+                if (BigInteger.GreatestCommonDivisor(i, modulus) != 1)
                 {
                     res--;
                 }

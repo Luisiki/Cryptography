@@ -23,13 +23,13 @@ namespace Krypto.Krypto // Note: actual namespace depends on the project name.
             BigInteger modulus = 10;
 
 
-            HashSet<BigInteger> brutes = new HashSet<BigInteger>();
+            List<BigInteger> brutes = new List<BigInteger>();
             while (modulus < 1001)
             {
                 brutes.Add(cryptoOperations.eulerPhi(modulus, EulerPhiSelection.Brute));
                 modulus++;
             }
-
+            /*
             modulus = 10;
             List<BigInteger> mobiuses = new List<BigInteger>();
             while (modulus < 1001)
@@ -37,11 +37,13 @@ namespace Krypto.Krypto // Note: actual namespace depends on the project name.
                 mobiuses.Add(cryptoOperations.eulerPhi(modulus, EulerPhiSelection.Mobius));
                 modulus++;
             }
+            */
 
             modulus = 10;
             var hashSet = new HashSet<BigInteger>();
             String errors = "";
             String modulusErrors="";
+            /*
             foreach (var value in mobiuses)
             {
                 if (!hashSet.Add(value))
@@ -51,10 +53,16 @@ namespace Krypto.Krypto // Note: actual namespace depends on the project name.
                 }
 
                 modulus++;
+            }*/
+            String brutess = "";
+            foreach (var VARIABLE in brutes)
+            {
+                brutess += VARIABLE + ",";
             }
-            fileOperations.saveToFile("/Files/", "errors.txt", errors);
-            fileOperations.saveToFile("/Files/", "modulusErrors.txt", modulusErrors);
 
+            //fileOperations.saveToFile("/Files/", "error_outputs.txt", errors);
+            //fileOperations.saveToFile("/Files/", "modulus_Errors.txt", modulusErrors);
+            fileOperations.saveToFile("/Files/", "correct_values.txt", brutess);
 
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
