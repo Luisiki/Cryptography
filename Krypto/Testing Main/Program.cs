@@ -15,31 +15,7 @@ namespace Krypto.Krypto // Note: actual namespace depends on the project name.
     {
         static void Main(string[] args)
         {
-            CryptoOperations cryptoOperations = new CryptoOperations();
-            FileOperations fileOperations = new FileOperations();
 
-
-
-            String times = "";
-
-            
-            BigInteger modulus = 100000000;
-
-            for (int u = 0; u < 1000; u++)
-            {
-                var watch = System.Diagnostics.Stopwatch.StartNew();
-                BigInteger[] res = (cryptoOperations.Factorization(modulus,
-                    FactorizationSelection.LenstraEllipticCurveFactorization));
-                watch.Stop();
-                var elapsedMs = watch.ElapsedMilliseconds;
-                    //watch.ElapsedTicks - TimeSpan.TicksPerMillisecond / 1000;
-                times += elapsedMs+",";
-                Console.Write(modulus + "\n");
-                modulus++;
-            }
-            
-            fileOperations.saveToFile("/Files/","times_optimized_50k_100k.txt",times);
-            
 
             //BigInteger tmp = cryptoOperations.getGenerator(modulus, GeneratorSearch.PollardRho);
 

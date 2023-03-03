@@ -9,10 +9,8 @@ namespace Krypto.Operations.File_Operations
 {
     public class FileOperations
     {
-        private string _dir;
         public FileOperations()
         {
-            _dir = AppDomain.CurrentDomain.BaseDirectory;
         }
         /// <summary>
         /// Reads file and returns it as a string
@@ -20,30 +18,12 @@ namespace Krypto.Operations.File_Operations
         /// <param name="path"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public string readFileString(string path, string name)
+        public static string readFileString(string path, string name)
         {
+            string _dir = AppDomain.CurrentDomain.BaseDirectory;
             string res = File.ReadAllText(_dir + path + name);
 
             return res;
-        }
-
-        public void parseFile(string path, string name, BigInteger[] numbers)
-        {
-            int quarter = numbers.Length/4;
-            String str1 = "", str2 = "", str3 = "", str4 = "";
-
-            for (int i = 0; i < quarter; i++)
-            {
-                str1 += numbers[i] + ",";
-                str2 += numbers[2*i] + ",";
-                str3 += numbers[3*i] + ",";
-                str4 += numbers[4*i] + ",";
-            }
-
-            saveToFile(path, "1" + name,str1);
-            saveToFile(path, "2" + name, str2);
-            saveToFile(path, "3" + name, str3);
-            saveToFile(path, "4" + name, str4);
         }
 
         /// <summary>
@@ -52,8 +32,10 @@ namespace Krypto.Operations.File_Operations
         /// <param name="path"></param>
         /// <param name="name"></param>
         /// <param name="text"></param>
-        public void saveToFile(string path, string name, string text)
+        public static void saveToFile(string path, string name, string text)
         {
+            string _dir = AppDomain.CurrentDomain.BaseDirectory;
+
             File.WriteAllText(_dir + path + name, text);
         }
 
@@ -63,7 +45,7 @@ namespace Krypto.Operations.File_Operations
         /// <param name="path"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public BigInteger[] readFileNumbers(string path, string name)
+        public static BigInteger[] readFileNumbers(string path, string name)
         {
             string text = readFileString(path, name);
 
@@ -81,11 +63,11 @@ namespace Krypto.Operations.File_Operations
         }
 
 
-        public String get_dir()
+        public static String get_dir()
         {
+            string _dir = AppDomain.CurrentDomain.BaseDirectory;
             return _dir;
         }
-
 
 
     }

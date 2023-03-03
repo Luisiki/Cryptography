@@ -33,7 +33,6 @@ namespace Krypto.Operations.Crypto_Operations
     public class CryptoOperations
     {
 
-        private Intermediaries intern = null;
 
         public CryptoOperations()
         {
@@ -42,27 +41,26 @@ namespace Krypto.Operations.Crypto_Operations
 
         private void Initialization()
         {
-            this.intern = new Intermediaries();
         }
 
-        public BigInteger BabyStepGiantStep(BigInteger modulo, BigInteger generator, BigInteger b)
+        public static BigInteger BabyStepGiantStep(BigInteger modulo, BigInteger generator, BigInteger b)
         {
             BigInteger order = modulo - 1;
-            BigInteger h = intern.SqrtFast(order);
+            BigInteger h = Intermediaries.SqrtFast(order);
 
             List<BigInteger> BabyStep = new List<BigInteger>();
 
             for (BigInteger j = 0; j < h; j++)
             {
-                BabyStep.Add(intern.PowMod(generator, j, modulo));
+                BabyStep.Add(Intermediaries.PowMod(generator, j, modulo));
             }
 
-            BigInteger intermediary = intern.PowMod(generator, order - h, modulo);
+            BigInteger intermediary = Intermediaries.PowMod(generator, order - h, modulo);
             List<BigInteger> GiantStep = new List<BigInteger>();
 
             for (BigInteger i = 0; i < h; i++)
             {
-                GiantStep.Add((b*intern.PowMod(intermediary,i,modulo))% modulo);
+                GiantStep.Add((b*Intermediaries.PowMod(intermediary,i,modulo))% modulo);
             }
 
             for (int i = 0; i < h; i++)
@@ -78,8 +76,7 @@ namespace Krypto.Operations.Crypto_Operations
             return 0;
         }
 
-
-        private BigInteger FindGenerator(BigInteger modulus)
+        private static BigInteger FindGenerator(BigInteger modulus)
         {
             var rand = new Random();
             bool flag = true;
@@ -93,7 +90,7 @@ namespace Krypto.Operations.Crypto_Operations
 
                 for (BigInteger j = 1; j < modulus ; j++)
                 {
-                    temp = intern.PowMod(potentialGenerator, j, modulus);
+                    temp = Intermediaries.PowMod(potentialGenerator, j, modulus);
                     if (temp ==1 && (j != (modulus - 1)))
                     {
                         break;
@@ -111,21 +108,21 @@ namespace Krypto.Operations.Crypto_Operations
             /* Check
             for (BigInteger i = 1; (i < modulus); i++)
             {
-                Console.WriteLine(intern.PowMod(potentialGenerator, i, modulus));
+                Console.WriteLine(Intermediaries.PowMod(potentialGenerator, i, modulus));
             }
             */
 
             return potentialGenerator;
         }
 
-        public BigInteger powMod(BigInteger x, BigInteger y, BigInteger modulo)
+        public static  BigInteger powMod(BigInteger x, BigInteger y, BigInteger modulo)
         {
-            return (intern.PowMod(x, y, modulo));
+            return (Intermediaries.PowMod(x, y, modulo));
         }
 
-        public BigInteger quadraticSieve(BigInteger n)
+        public static  BigInteger quadraticSieve(BigInteger n)
         {
-            BigInteger limit = intern.SqrtFast(n);
+            BigInteger limit = Intermediaries.SqrtFast(n);
             BigInteger[] primes = generatePrimes(limit);
 
             BigInteger[] factors = new BigInteger[primes.Length];
@@ -136,8 +133,8 @@ namespace Krypto.Operations.Crypto_Operations
 
             while (true)
             {
-                BigInteger a = intern.getRandomBigInteger(2, n - 1);
-                BigInteger x = intern.PowMod(a, 2, n);
+                BigInteger a = Intermediaries.getRandomBigInteger(2, n - 1);
+                BigInteger x = Intermediaries.PowMod(a, 2, n);
                 BigInteger y = x;
 
                 for (int i = 0; i < k; i++)
@@ -150,7 +147,7 @@ namespace Krypto.Operations.Crypto_Operations
                         e++;
                     }
 
-                    factors[i] = intern.PowMod(primes[i], ((exponents[i] + e) % 2), n);
+                    factors[i] = Intermediaries.PowMod(primes[i], ((exponents[i] + e) % 2), n);
                     exponents[i] = (exponents[i] + e) % 2;
                 }
 
@@ -160,7 +157,7 @@ namespace Krypto.Operations.Crypto_Operations
 
                     for (int i = 0; i < k; i++)
                     {
-                        factor = BigInteger.Multiply(factor, intern.PowMod(factors[i], exponents[i], n));
+                        factor = BigInteger.Multiply(factor, Intermediaries.PowMod(factors[i], exponents[i], n));
                     }
 
                     return factor;
@@ -168,7 +165,7 @@ namespace Krypto.Operations.Crypto_Operations
             }
         }
 
-        private BigInteger[] generatePrimes(BigInteger limit)
+        private static BigInteger[] generatePrimes(BigInteger limit)
         {
             bool[] sieve = new bool[(int)BigInteger.Remainder(limit + 1, int.MaxValue)];
 
@@ -205,7 +202,7 @@ namespace Krypto.Operations.Crypto_Operations
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public BigInteger[] pollardRho(BigInteger input)
+        private static BigInteger[] pollardRho(BigInteger input)
         {
             List<BigInteger> factors = new List<BigInteger>();
             BigInteger[] temp = new BigInteger[2];
@@ -231,7 +228,7 @@ namespace Krypto.Operations.Crypto_Operations
             return res;
         }
 
-        private BigInteger[] pollard(BigInteger input, BigInteger modulo)
+        private static BigInteger[] pollard(BigInteger input, BigInteger modulo)
         {
             BigInteger x, y;
             BigInteger c, d = 1;
@@ -241,16 +238,16 @@ namespace Krypto.Operations.Crypto_Operations
                 return new BigInteger[] { 2, modulo / 2 };
             }
 
-            x = intern.getRandomBigInteger(2, input - 1);
+            x = Intermediaries.getRandomBigInteger(2, input - 1);
             y = x;
 
-            c = intern.getRandomBigInteger(2, input - 1);
+            c = Intermediaries.getRandomBigInteger(2, input - 1);
 
             BigInteger index = 0;
             while (d == 1)
             {
-                x = fX(x, c, modulo);
-                y = gx(y, c, modulo);
+                x = CryptoOperations.fX(x, c, modulo);
+                y = CryptoOperations.gx(y, c, modulo);
 
                 d = BigInteger.GreatestCommonDivisor(abs(x - 1), modulo);
 
@@ -281,7 +278,7 @@ namespace Krypto.Operations.Crypto_Operations
         /// </summary>
         /// <param name="candidate"></param>
         /// <returns></returns>
-        public bool MillerRabin(BigInteger candidate, int numberOfIterations)
+        private static bool MillerRabin(BigInteger candidate, int numberOfIterations)
         {
             if (candidate % 2 == 0)
             {
@@ -290,10 +287,10 @@ namespace Krypto.Operations.Crypto_Operations
 
             for (int j = 0; j < numberOfIterations; j++)
             {
-                BigInteger a = intern.getRandomBigInteger(2, candidate - 2);
-                BigInteger[] ds = getMillerRabinIntern(candidate);//d,s
+                BigInteger a = Intermediaries.getRandomBigInteger(2, candidate - 2);
+                BigInteger[] ds = getMillerRabinIntermediaries(candidate);//d,s
 
-                var variable = intern.PowMod(a, ds[0], candidate);
+                var variable = Intermediaries.PowMod(a, ds[0], candidate);
                 if (variable != 1 && variable != candidate - 1)
                 {
                     return false;
@@ -302,7 +299,7 @@ namespace Krypto.Operations.Crypto_Operations
 
                 for (int i = 0; i < ds[1]; i++)
                 {
-                    variable = intern.PowMod(variable, 2, candidate);
+                    variable = Intermediaries.PowMod(variable, 2, candidate);
                     if (variable != 1 && variable != candidate - 1)
                     {
                         return false;
@@ -316,13 +313,13 @@ namespace Krypto.Operations.Crypto_Operations
         /// returns d and s, where n - 1 = 2^s * d mod n
         /// </summary>
         /// <returns></returns>
-        private BigInteger[] getMillerRabinIntern(BigInteger n)
+        private static BigInteger[] getMillerRabinIntermediaries(BigInteger n)
         {
             BigInteger s, d;
 
-            s = intern.getRandomBigInteger(2, n - 2);
+            s = Intermediaries.getRandomBigInteger(2, n - 2);
 
-            d = (n - 1) / intern.PowMod(2, s, n);
+            d = (n - 1) / Intermediaries.PowMod(2, s, n);
 
             return new BigInteger[]{d, s};
         }
@@ -334,9 +331,7 @@ namespace Krypto.Operations.Crypto_Operations
         /// <param name="input"></param>
         /// <param name="modulo"></param>
         /// <returns></returns>
-        
-
-        private BigInteger abs(BigInteger input)
+        private static BigInteger abs(BigInteger input)
         {
             if (input < 0)
             {
@@ -353,9 +348,9 @@ namespace Krypto.Operations.Crypto_Operations
         /// <param name="c"></param>
         /// <param name="n"></param>
         /// <returns></returns>
-        private BigInteger fX(BigInteger x, BigInteger c, BigInteger n)
+        private static BigInteger fX(BigInteger x, BigInteger c, BigInteger n)
         {
-            return (intern.PowMod(x, 2, n) + c) % n;
+            return (Intermediaries.PowMod(x, 2, n) + c) % n;
         }
 
         /// <summary>
@@ -365,7 +360,7 @@ namespace Krypto.Operations.Crypto_Operations
         /// <param name="d"></param>
         /// <param name="n"></param>
         /// <returns></returns>
-        private BigInteger gx(BigInteger x, BigInteger d, BigInteger n)
+        private static BigInteger gx(BigInteger x, BigInteger d, BigInteger n)
         {
             return ((x << 1) + d) % n;
         }
@@ -377,7 +372,7 @@ namespace Krypto.Operations.Crypto_Operations
         /// <param name="searchType"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public BigInteger getGenerator(BigInteger modulus, GeneratorSearch searchType)
+        public static BigInteger getGenerator(BigInteger modulus, GeneratorSearch searchType)
         {
             switch (searchType)
             {
@@ -398,20 +393,20 @@ namespace Krypto.Operations.Crypto_Operations
             return -1;
         }
 
-        public BigInteger pollardGenerator(BigInteger modulus)
+        private static BigInteger pollardGenerator(BigInteger modulus)
         {
-            BigInteger generator = intern.getRandomBigInteger(2, modulus - 1);
+            BigInteger generator = Intermediaries.getRandomBigInteger(2, modulus - 1);
             BigInteger[] primes = pollardRho(eulerPhi(modulus,EulerPhiSelection.Mobius));
             Array.Sort(primes);
 
             for (int i = 1; i < primes.Length; i++)
             {
-                if (intern.PowMod(generator, i, modulus) != 1)
+                if (Intermediaries.PowMod(generator, i, modulus) != 1)
                 {
-                    generator = intern.getRandomBigInteger(2, modulus - 1);
+                    generator = Intermediaries.getRandomBigInteger(2, modulus - 1);
                     while ((BigInteger.GreatestCommonDivisor(generator, modulus) != 1))
                     {
-                        generator = intern.getRandomBigInteger(2, modulus - 1);
+                        generator = Intermediaries.getRandomBigInteger(2, modulus - 1);
                     }
                 }
             }
@@ -420,7 +415,7 @@ namespace Krypto.Operations.Crypto_Operations
             return generator;
         }
 
-        public BigInteger eulerPhi(BigInteger modulus, EulerPhiSelection selection)
+        public static BigInteger eulerPhi(BigInteger modulus, EulerPhiSelection selection)
         {
             switch (selection)
             {
@@ -436,7 +431,7 @@ namespace Krypto.Operations.Crypto_Operations
             return -1;
         }
 
-        private BigInteger eulerPhiBrute(BigInteger modulus)
+        private static BigInteger eulerPhiBrute(BigInteger modulus)
         {
             BigInteger res = modulus - 1;
 
@@ -452,7 +447,7 @@ namespace Krypto.Operations.Crypto_Operations
         }
 
 
-        private BigInteger eulerPhiMobius(BigInteger modulus)
+        private static BigInteger eulerPhiMobius(BigInteger modulus)
         {
             BigInteger[] primes = pollardRho(modulus);
             if (modulus == primes[0])
@@ -472,8 +467,8 @@ namespace Krypto.Operations.Crypto_Operations
             }
             return result;
         }
-         
-        private BigInteger mobiusFunction(BigInteger n)
+
+        private static BigInteger mobiusFunction(BigInteger n)
         {
             if (n == 1)
             {
@@ -501,7 +496,7 @@ namespace Krypto.Operations.Crypto_Operations
         /// </summary>
         /// <param name="n"></param>
         /// <returns></returns>
-        private bool isWithoutSquares(BigInteger[] primeFactors)
+        private static bool isWithoutSquares(BigInteger[] primeFactors)
         {
             List<BigInteger> list = new List<BigInteger>(primeFactors);
             var hashSet = new HashSet<BigInteger>(list);
@@ -540,7 +535,7 @@ namespace Krypto.Operations.Crypto_Operations
 
         }
 
-        public BigInteger[] LECF(BigInteger modulus)
+        private static BigInteger[] LECF(BigInteger modulus)
         {
             List<BigInteger> list = new List<BigInteger>();
             int numberOfIterations = 0;
@@ -574,9 +569,9 @@ namespace Krypto.Operations.Crypto_Operations
             }
             return result;
         }
-        
 
-        public BigInteger LenstraEllipticCurveFactorization(BigInteger modulus)
+
+        private static BigInteger LenstraEllipticCurveFactorization(BigInteger modulus)
         {
             if (modulus % 2 == 0)
             {
@@ -598,14 +593,14 @@ namespace Krypto.Operations.Crypto_Operations
 
 
             Point P0 = new Point();
-            P0.x = intern.getRandomBigInteger(1, modulus - 1);
-            P0.y = intern.getRandomBigInteger(1, modulus - 1);
+            P0.x = Intermediaries.getRandomBigInteger(1, modulus - 1);
+            P0.y = Intermediaries.getRandomBigInteger(1, modulus - 1);
 
             EllpticCurve E = new EllpticCurve();
-            E.a = intern.getRandomBigInteger(1, modulus - 1);
+            E.a = Intermediaries.getRandomBigInteger(1, modulus - 1);
 
             //b = y^2-x0^3-a*x0
-            E.b = intern.getRandomBigInteger(1, modulus - 1);
+            E.b = Intermediaries.getRandomBigInteger(1, modulus - 1);
             //(P0.y * P0.y - P0.x * P0.x * P0.x - E.a * P0.x) % modulus;
             E.modulo = modulus;
 
@@ -616,7 +611,7 @@ namespace Krypto.Operations.Crypto_Operations
             BigInteger d = 0;
             if (modulus > 10000000)
             {
-                for (int i = 1; i < intern.SqrtFast(intern.SqrtFast(modulus)); i++)
+                for (int i = 1; i < Intermediaries.SqrtFast(Intermediaries.SqrtFast(modulus)); i++)
                 {
                     points.Add(Point.pointAddition(points[i - 1], E));
 
@@ -630,7 +625,7 @@ namespace Krypto.Operations.Crypto_Operations
             }
             else
             {
-                for (int i = 1; i < intern.SqrtFast(modulus); i++)
+                for (int i = 1; i < Intermediaries.SqrtFast(modulus); i++)
                 {
                     points.Add(Point.pointAddition(points[i - 1], E));
 
@@ -647,12 +642,12 @@ namespace Krypto.Operations.Crypto_Operations
             return -1;
         }
 
-        public BigInteger[] Factorization(BigInteger n, FactorizationSelection selection)
+        public static BigInteger[] Factorization(BigInteger n, FactorizationSelection selection)
         {
             switch (selection)
             {
                 case FactorizationSelection.Brute:
-                    break;
+                    return factorizationBrute(n);
                 case FactorizationSelection.PollarRho:
                     return pollardRho(n);
                 case FactorizationSelection.BabyStepGiantStep:
@@ -665,6 +660,48 @@ namespace Krypto.Operations.Crypto_Operations
             return new BigInteger[] { };
         }
 
+        private static BigInteger[] factorizationBrute(BigInteger n)
+        {
+            BigInteger[] result;
+            List<BigInteger> factors = new List<BigInteger>();
+
+            for (BigInteger i = 2; i < Intermediaries.SqrtFast(n); i++)
+            {
+                if (n % i == 0)
+                {
+                    n /= i;
+                    factors.Add(i);
+                    i--;
+                }
+            }
+
+            result = new BigInteger[factors.Count];
+
+            for (int i = 0; i < factors.Count; i++)
+            {
+                result[i] = factors[i];
+            }
+
+            return result;
+        }
+
+        private static BigInteger[] BSGSfactorization(BigInteger n)//baby step giant step
+        {
+            BigInteger x = Intermediaries.SqrtFast(n);
+            BigInteger y = 0;
+
+            List<BigInteger> list = new List<BigInteger>();
+
+            while (true)
+            {
+                BigInteger z = x * x - n * y * y;
+
+                if(z==1)
+                {
+                    return x;
+                }
+            }
+        }
     }
 
     internal class Intermediaries
@@ -692,7 +729,7 @@ namespace Krypto.Operations.Crypto_Operations
         /// <param name="y">exponent</param>
         /// <param name="p">modulus</param>
         /// <returns></returns>
-        public BigInteger PowMod(BigInteger x, BigInteger y, BigInteger p)
+        public static BigInteger PowMod(BigInteger x, BigInteger y, BigInteger p)
         {
             if (y < (BigInteger)0)
             {
@@ -729,7 +766,7 @@ namespace Krypto.Operations.Crypto_Operations
 
         private static readonly BigInteger FastSqrtSmallNumber = 4503599761588223UL;
 
-        public BigInteger SqrtFast(BigInteger value)
+        public static BigInteger SqrtFast(BigInteger value)
         {
             if (value <= FastSqrtSmallNumber) // small enough for Math.Sqrt() or negative?
             {
@@ -757,7 +794,7 @@ namespace Krypto.Operations.Crypto_Operations
             }
         }
 
-        static bool IsSqrt(BigInteger value, BigInteger root)
+        public static bool IsSqrt(BigInteger value, BigInteger root)
         {
             var lowerBound = root * root;
 
@@ -765,7 +802,7 @@ namespace Krypto.Operations.Crypto_Operations
         }
 
 
-        public BigInteger getRandomBigInteger(BigInteger min, BigInteger max)
+        public static BigInteger getRandomBigInteger(BigInteger min, BigInteger max)
         {
             byte[] bytes = max.ToByteArray();
             BigInteger result;
