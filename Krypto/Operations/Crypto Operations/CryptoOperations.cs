@@ -614,17 +614,35 @@ namespace Krypto.Operations.Crypto_Operations
             points.Add(P0);
 
             BigInteger d = 0;
-            for (int i = 1; i < intern.SqrtFast(modulus); i++)
+            if (modulus > 10000000)
             {
-                points.Add(Point.pointAddition(points[i - 1], E));
-
-                d = BigInteger.GreatestCommonDivisor(modulus, points[i - 1].y);
-
-                if (d > 1 && d < modulus)
+                for (int i = 1; i < intern.SqrtFast(intern.SqrtFast(modulus)); i++)
                 {
-                    return d;
+                    points.Add(Point.pointAddition(points[i - 1], E));
+
+                    d = BigInteger.GreatestCommonDivisor(modulus, points[i - 1].y);
+
+                    if (d > 1 && d < modulus)
+                    {
+                        return d;
+                    }
                 }
             }
+            else
+            {
+                for (int i = 1; i < intern.SqrtFast(modulus); i++)
+                {
+                    points.Add(Point.pointAddition(points[i - 1], E));
+
+                    d = BigInteger.GreatestCommonDivisor(modulus, points[i - 1].y);
+
+                    if (d > 1 && d < modulus)
+                    {
+                        return d;
+                    }
+                }
+            }
+            
             
             return -1;
         }

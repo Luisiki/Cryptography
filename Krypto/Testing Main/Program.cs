@@ -18,15 +18,14 @@ namespace Krypto.Krypto // Note: actual namespace depends on the project name.
             CryptoOperations cryptoOperations = new CryptoOperations();
             FileOperations fileOperations = new FileOperations();
 
-            fileOperations.parseFile("/Files/", "time_optimized_20_50000.txt", fileOperations.readFileNumbers("/Files/", "times_optimized_1000_50000.txt"));
 
 
             String times = "";
 
-            /*
-            BigInteger modulus = 20;
+            
+            BigInteger modulus = 100000000;
 
-            for (int u = 0; u < 50000; u++)
+            for (int u = 0; u < 1000; u++)
             {
                 var watch = System.Diagnostics.Stopwatch.StartNew();
                 BigInteger[] res = (cryptoOperations.Factorization(modulus,
@@ -39,8 +38,8 @@ namespace Krypto.Krypto // Note: actual namespace depends on the project name.
                 modulus++;
             }
             
-            fileOperations.saveToFile("/Files/","times_optimized_1000_100000.txt",times);
-            */
+            fileOperations.saveToFile("/Files/","times_optimized_50k_100k.txt",times);
+            
 
             //BigInteger tmp = cryptoOperations.getGenerator(modulus, GeneratorSearch.PollardRho);
 
