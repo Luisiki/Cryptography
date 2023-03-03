@@ -524,7 +524,7 @@ namespace Krypto.Operations.Crypto_Operations
                 Point result = new Point();
 
                 BigInteger s = (3 * point.x * point.x + curve.a) *
-                               Intermediaries.PoMod(2 * point.y, curve.modulo - 2, curve.modulo);
+                               Intermediaries.PoMod(point.y<<1, curve.modulo - 2, curve.modulo);
                 
 
                 result.x = (s*s - point.x - point.x) % curve.modulo;
@@ -559,11 +559,8 @@ namespace Krypto.Operations.Crypto_Operations
 
                 if (numberOfIterations > 500)
                 {
-                    if (MillerRabin(modulus, 1000))
-                    {
-                        list.Add(modulus);
-                        modulus /= modulus;
-                    }
+                    list.Add(modulus);
+                    modulus /= modulus;
                 }
                 
 
@@ -581,6 +578,25 @@ namespace Krypto.Operations.Crypto_Operations
 
         public BigInteger LenstraEllipticCurveFactorization(BigInteger modulus)
         {
+            if (modulus % 2 == 0)
+            {
+                return 2;
+            }else if (modulus % 3 == 0)
+            {
+                return 3;
+            }else if (modulus % 5 == 0)
+            {
+                return 5;
+            }else if (modulus % 7 == 0)
+            {
+                return 7;
+            }else if (modulus % 11 == 0)
+            {
+                return 11;
+            }
+
+
+
             Point P0 = new Point();
             P0.x = intern.getRandomBigInteger(1, modulus - 1);
             P0.y = intern.getRandomBigInteger(1, modulus - 1);
@@ -598,7 +614,7 @@ namespace Krypto.Operations.Crypto_Operations
             points.Add(P0);
 
             BigInteger d = 0;
-            for (int i = 1; i < 100000; i++)
+            for (int i = 1; i < intern.SqrtFast(modulus); i++)
             {
                 points.Add(Point.pointAddition(points[i - 1], E));
 

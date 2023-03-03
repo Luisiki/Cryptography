@@ -27,6 +27,25 @@ namespace Krypto.Operations.File_Operations
             return res;
         }
 
+        public void parseFile(string path, string name, BigInteger[] numbers)
+        {
+            int quarter = numbers.Length/4;
+            String str1 = "", str2 = "", str3 = "", str4 = "";
+
+            for (int i = 0; i < quarter; i++)
+            {
+                str1 += numbers[i] + ",";
+                str2 += numbers[2*i] + ",";
+                str3 += numbers[3*i] + ",";
+                str4 += numbers[4*i] + ",";
+            }
+
+            saveToFile(path, "1" + name,str1);
+            saveToFile(path, "2" + name, str2);
+            saveToFile(path, "3" + name, str3);
+            saveToFile(path, "4" + name, str4);
+        }
+
         /// <summary>
         /// Saves text to file
         /// </summary>

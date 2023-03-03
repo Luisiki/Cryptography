@@ -18,19 +18,29 @@ namespace Krypto.Krypto // Note: actual namespace depends on the project name.
             CryptoOperations cryptoOperations = new CryptoOperations();
             FileOperations fileOperations = new FileOperations();
 
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
-            Console.WriteLine(elapsedMs + "ms");
-            BigInteger modulus = 630;
-            BigInteger[] res = (cryptoOperations.Factorization(modulus,
-                FactorizationSelection.LenstraEllipticCurveFactorization));
+            fileOperations.parseFile("/Files/", "time_optimized_20_50000.txt", fileOperations.readFileNumbers("/Files/", "times_optimized_1000_50000.txt"));
 
-            for (int i = 0; i < res.Length; i++)
+
+            String times = "";
+
+            /*
+            BigInteger modulus = 20;
+
+            for (int u = 0; u < 50000; u++)
             {
-                Console.Write(res[i]+", ");
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                BigInteger[] res = (cryptoOperations.Factorization(modulus,
+                    FactorizationSelection.LenstraEllipticCurveFactorization));
+                watch.Stop();
+                var elapsedMs = watch.ElapsedMilliseconds;
+                    //watch.ElapsedTicks - TimeSpan.TicksPerMillisecond / 1000;
+                times += elapsedMs+",";
+                Console.Write(modulus + "\n");
+                modulus++;
             }
-
+            
+            fileOperations.saveToFile("/Files/","times_optimized_1000_100000.txt",times);
+            */
 
             //BigInteger tmp = cryptoOperations.getGenerator(modulus, GeneratorSearch.PollardRho);
 
