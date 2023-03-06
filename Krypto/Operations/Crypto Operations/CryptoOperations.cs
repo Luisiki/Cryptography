@@ -30,6 +30,7 @@ namespace Krypto.Operations.Crypto_Operations
         LenstraEllipticCurveFactorization = 4
     }
 
+
     public class CryptoOperations
     {
 
@@ -285,43 +286,47 @@ namespace Krypto.Operations.Crypto_Operations
                 return false;
             }
 
-            for (int j = 0; j < numberOfIterations; j++)
-            {
-                BigInteger a = Intermediaries.getRandomBigInteger(2, candidate - 2);
-                BigInteger[] ds = getMillerRabinIntermediaries(candidate);//d,s
+            BigInteger a = Intermediaries.getRandomBigInteger(2, candidate-1);
 
-                var variable = Intermediaries.PowMod(a, ds[0], candidate);
-                if (variable != 1 && variable != candidate - 1)
+            if (Intermediaries.PowMod(a, candidate - 1, candidate) != 1)
+            {
+                return false;
+            }
+
+            BigInteger[] sd = miller(candidate);
+
+            a = Intermediaries.getRandomBigInteger(2, candidate - 1);
+            var temp = Intermediaries.PowMod(a, sd[1], candidate);
+
+            if (!(temp != 1 && temp != candidate - 1))
+            {
+                return false;
+            }
+
+
+            for (int i = 2; i < sd[0] - 1; i+=2)
+            {
+                temp = Intermediaries.PowMod(a, i, candidate);
+                if (!(temp != 1 && temp != candidate - 1))
                 {
                     return false;
-                }
-
-
-                for (int i = 0; i < ds[1]; i++)
-                {
-                    variable = Intermediaries.PowMod(variable, 2, candidate);
-                    if (variable != 1 && variable != candidate - 1)
-                    {
-                        return false;
-                    }
                 }
             }
 
             return true;
         }
-        /// <summary>
-        /// returns d and s, where n - 1 = 2^s * d mod n
-        /// </summary>
-        /// <returns></returns>
-        private static BigInteger[] getMillerRabinIntermediaries(BigInteger n)
+
+        private static BigInteger[] miller(BigInteger n)
         {
-            BigInteger s, d;
+            BigInteger s = 0, d = 0;
 
-            s = Intermediaries.getRandomBigInteger(2, n - 2);
+            while (d % 2 != 1)
+            {
+                s = Intermediaries.getRandomBigInteger(2, n - 1);
+                d = ((n - 1) * Intermediaries.PowMod(Intermediaries.PowMod(2, s, n), n - 2, n))%n;
+            }
 
-            d = (n - 1) / Intermediaries.PowMod(2, s, n);
-
-            return new BigInteger[]{d, s};
+            return new BigInteger[]{s, d} ;
         }
 
         /// <summary>
@@ -651,7 +656,7 @@ namespace Krypto.Operations.Crypto_Operations
                 case FactorizationSelection.PollarRho:
                     return pollardRho(n);
                 case FactorizationSelection.BabyStepGiantStep:
-                    return new BigInteger[] { };
+                    return BSGS(n);
                 case FactorizationSelection.LenstraEllipticCurveFactorization:
                     return LECF(n);
                 default:
@@ -685,9 +690,59 @@ namespace Krypto.Operations.Crypto_Operations
             return result;
         }
 
-        private static BigInteger[] BSGSfactorization(BigInteger n)//baby step giant step
+        private static BigInteger[] BSGS(BigInteger n)
         {
-            BigInteger x = Intermediaries.SqrtFast(n);
+            List<BigInteger> factors = new List<BigInteger>();
+
+            while (n != 1)
+            {
+                
+                if (n % 2 ==0)
+                {
+                    n /= 2;
+                    factors.Add(2);
+                }else if (n % 3 == 0)
+                {
+                    n /= 3;
+                    factors.Add(3);
+                }
+                else if (n % 5 == 0)
+                {
+                    n /= 5;
+                    factors.Add(5);
+                }
+                else if (n % 7 == 0)
+                {
+                    n /= 7;
+                    factors.Add(7);
+                }
+                else if (MillerRabin(n, 10))
+                {
+                    n /= n;
+                    factors.Add(n);
+                }
+                else
+                {
+                    var temp = BSGSfactorization(n);
+                    n /= temp;
+
+                    factors.Add(temp);
+                }
+                
+            }
+
+            BigInteger[] result = new BigInteger[factors.Count];
+            for (int i = 0; i < factors.Count; i++)
+            {
+                result[i] = factors[i];
+            }
+
+            return result;
+        }
+
+        private static BigInteger BSGSfactorization(BigInteger n)//baby step giant step
+        {
+            BigInteger x = Intermediaries.Sqrt(n);
             BigInteger y = 0;
 
             List<BigInteger> list = new List<BigInteger>();
@@ -695,10 +750,38 @@ namespace Krypto.Operations.Crypto_Operations
             while (true)
             {
                 BigInteger z = x * x - n * y * y;
-
-                if(z==1)
+                if (z == 1)
                 {
                     return x;
+                }
+                if (z < 1)
+                {
+                    x++;
+                    y = Intermediaries.Sqrt(n - x * x);
+                }
+                else
+                {
+                    Dictionary<BigInteger, BigInteger> babyStep = new Dictionary<BigInteger, BigInteger>();
+                    BigInteger m = Intermediaries.Sqrt(z);
+                    BigInteger giantStep = m;
+
+                    for (BigInteger i = 0; i < m; i++)
+                    {
+                        BigInteger xi = Intermediaries.PowMod(x + i, n - 2, n) * z % n;
+                        babyStep[xi] = i;
+                    }
+
+                    for (BigInteger i = 0; i < m; i++)
+                    {
+                        BigInteger xi = BigInteger.ModPow(giantStep, n - 2, n) % n;
+                        if (babyStep.ContainsKey(xi))
+                        {
+                            return BigInteger.GreatestCommonDivisor(x + i + babyStep[xi], n);
+                        }
+                        giantStep = (giantStep * x) % n;
+                    }
+                    x++;
+                    y = Intermediaries.Sqrt(n - x * x);
                 }
             }
         }
