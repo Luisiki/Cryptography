@@ -43,11 +43,29 @@ namespace Krypto.Operations.Crypto_Operations
         private void Initialization()
         {
         }
+        public static BigInteger[] Factorization(BigInteger n, FactorizationSelection selection)
+        {
+            switch (selection)
+            {
+                case FactorizationSelection.Brute:
+                    return factorizationBrute(n);
+                case FactorizationSelection.PollarRho:
+                    return pollardRho(n);
+                case FactorizationSelection.BabyStepGiantStep:
+                    return BSGS(n);
+                case FactorizationSelection.LenstraEllipticCurveFactorization:
+                    return LECF(n);
+                default:
+                    break;
+            }
+            return new BigInteger[] { };
+        }
+
 
         public static BigInteger BabyStepGiantStep(BigInteger modulo, BigInteger generator, BigInteger b)
         {
             BigInteger order = modulo - 1;
-            BigInteger h = Intermediaries.SqrtFast(order);
+            BigInteger h = Intermediaries.Sqrt(order);
 
             List<BigInteger> BabyStep = new List<BigInteger>();
 
@@ -119,51 +137,6 @@ namespace Krypto.Operations.Crypto_Operations
         public static  BigInteger powMod(BigInteger x, BigInteger y, BigInteger modulo)
         {
             return (Intermediaries.PowMod(x, y, modulo));
-        }
-
-        public static  BigInteger quadraticSieve(BigInteger n)
-        {
-            BigInteger limit = Intermediaries.SqrtFast(n);
-            BigInteger[] primes = generatePrimes(limit);
-
-            BigInteger[] factors = new BigInteger[primes.Length];
-            BigInteger[] exponents = new BigInteger[primes.Length];
-            int k = primes.Length;
-
-
-
-            while (true)
-            {
-                BigInteger a = Intermediaries.getRandomBigInteger(2, n - 1);
-                BigInteger x = Intermediaries.PowMod(a, 2, n);
-                BigInteger y = x;
-
-                for (int i = 0; i < k; i++)
-                {
-                    BigInteger p = primes[i];
-                    int e = 0;
-                    while (BigInteger.Remainder(y, p) == 0)
-                    {
-                        y = BigInteger.Divide(y, p);
-                        e++;
-                    }
-
-                    factors[i] = Intermediaries.PowMod(primes[i], ((exponents[i] + e) % 2), n);
-                    exponents[i] = (exponents[i] + e) % 2;
-                }
-
-                if (y == 1)
-                {
-                    BigInteger factor = 1;
-
-                    for (int i = 0; i < k; i++)
-                    {
-                        factor = BigInteger.Multiply(factor, Intermediaries.PowMod(factors[i], exponents[i], n));
-                    }
-
-                    return factor;
-                }
-            }
         }
 
         private static BigInteger[] generatePrimes(BigInteger limit)
@@ -616,7 +589,7 @@ namespace Krypto.Operations.Crypto_Operations
             BigInteger d = 0;
             if (modulus > 10000000)
             {
-                for (int i = 1; i < Intermediaries.SqrtFast(Intermediaries.SqrtFast(modulus)); i++)
+                for (int i = 1; i < Intermediaries.Sqrt(Intermediaries.Sqrt(modulus)); i++)
                 {
                     points.Add(Point.pointAddition(points[i - 1], E));
 
@@ -630,7 +603,7 @@ namespace Krypto.Operations.Crypto_Operations
             }
             else
             {
-                for (int i = 1; i < Intermediaries.SqrtFast(modulus); i++)
+                for (int i = 1; i < Intermediaries.Sqrt(modulus); i++)
                 {
                     points.Add(Point.pointAddition(points[i - 1], E));
 
@@ -647,30 +620,12 @@ namespace Krypto.Operations.Crypto_Operations
             return -1;
         }
 
-        public static BigInteger[] Factorization(BigInteger n, FactorizationSelection selection)
-        {
-            switch (selection)
-            {
-                case FactorizationSelection.Brute:
-                    return factorizationBrute(n);
-                case FactorizationSelection.PollarRho:
-                    return pollardRho(n);
-                case FactorizationSelection.BabyStepGiantStep:
-                    return BSGS(n);
-                case FactorizationSelection.LenstraEllipticCurveFactorization:
-                    return LECF(n);
-                default:
-                    break;
-            }
-            return new BigInteger[] { };
-        }
-
         private static BigInteger[] factorizationBrute(BigInteger n)
         {
             BigInteger[] result;
             List<BigInteger> factors = new List<BigInteger>();
 
-            for (BigInteger i = 2; i < Intermediaries.SqrtFast(n); i++)
+            for (BigInteger i = 2; i < Intermediaries.Sqrt(n); i++)
             {
                 if (n % i == 0)
                 {
@@ -785,25 +740,131 @@ namespace Krypto.Operations.Crypto_Operations
                 }
             }
         }
+
+
+        private static BigInteger[] quadraticSieve(BigInteger n)
+        {
+            BigInteger B = Intermediaries.Sqrt(n);//smoothness bound
+
+            BigInteger[] BsmoothNumbers = generateB_smoothNumbers(B);
+            BigInteger[] Bi = getBi(BsmoothNumbers, n);
+
+            throw new NotImplementedException();
+        }
+
+        private static BigInteger[] generateB_smoothNumbers(BigInteger smoothnessBound)
+        {
+            BigInteger[] factors;
+            List<BigInteger> numbers = new List<BigInteger>();
+
+            for (int i = 2; i < smoothnessBound; i++)
+            {
+                factors = LECF(i);
+                if (getBiggest(factors) < smoothnessBound)
+                {
+                    numbers.Add(i);
+                }
+                
+            }
+
+            BigInteger[] result = new BigInteger[numbers.Count];
+            for (int i = 0; i < numbers.Count; i++)
+            {
+                result[i] = numbers[i];
+            }
+
+            return result;
+        }
+
+        private static BigInteger getBiggest(BigInteger[] input)
+        {
+            BigInteger res = input[0];
+            if (input.Length == 1)
+            {
+                return res;
+            }
+
+            for (int i = 1; i < input.Length; i++)
+            {
+                if (res < input[i])
+                {
+                    res = input[i];
+                }
+            }
+            return res;
+        }
+
+        private static BigInteger[] getBi(BigInteger[] input, BigInteger modulus)
+        {
+            BigInteger[] bis = new BigInteger[input.Length];
+
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                bis[i] = (input[i] * input[i]) % modulus;
+            }
+            return bis;
+        }
+        
+        private static List<BigInteger[]> getExponentVectors(BigInteger[] bi)
+        {
+            List<BigInteger[]> vectors = new List<BigInteger[]>();
+            for (int i = 0; i < bi.Length; i++)
+            {
+                
+
+            }
+            throw new NotImplementedException();
+        }
+
+        private static BigInteger[] getExponents(BigInteger[] factors)
+        {
+            Array.Sort(factors);
+            List<BigInteger> list = new List<BigInteger>(factors);
+
+            HashSet <BigInteger> hashSet = new HashSet<BigInteger>(factors);
+
+            for (int i = 0; i < hashSet.Count; i++)
+            {
+                var number = factors[i];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            }
+            throw new NotImplementedException();
+
+        }
+
+
+        public static void sqrttest()
+        {
+            for (int i = 0; i < 10000000; i++)
+            {
+                if (Intermediaries.SqrtCeiling(i) != (BigInteger)Math.Ceiling(Math.Sqrt(i)))
+                {
+                    Console.WriteLine(i);
+                }
+            }
+        }
+        
+
     }
 
     internal class Intermediaries
     {
         private static Random random = new Random();
-
-        public static BigInteger Sqrt(BigInteger n)
-        {
-            if (n == 0) return 0;
-            BigInteger x = n / 2 + 1;
-            BigInteger y = (x + n / x) / 2;
-            while (y < x)
-            {
-                x = y;
-                y = (x + n / x) / 2;
-            }
-            return x;
-        }
-
 
         /// <summary>
         /// Returns x^y mod p
@@ -847,41 +908,46 @@ namespace Krypto.Operations.Crypto_Operations
             return res;
         }
 
-        private static readonly BigInteger FastSqrtSmallNumber = 4503599761588223UL;
-
-        public static BigInteger SqrtFast(BigInteger value)
+        public static BigInteger Sqrt(BigInteger n)
         {
-            if (value <= FastSqrtSmallNumber) // small enough for Math.Sqrt() or negative?
+            if (n == 0)
             {
-                if (value.Sign < 0) throw new ArgumentException("Negative argument.");
-                return (ulong)Math.Sqrt((ulong)value);
+                return 0;
             }
 
-            BigInteger root; // now filled with an approximate value
-            int byteLen = value.ToByteArray().Length;
-            if (byteLen < 128) // small enough for direct double conversion?
+            BigInteger x = n;
+            BigInteger y = (x + 1) / 2;
+            while (y < x)
             {
-                root = (BigInteger)Math.Sqrt((double)value);
-            }
-            else // large: reduce with bitshifting, then convert to double (and back)
-            {
-                root = (BigInteger)Math.Sqrt((double)(value >> (byteLen - 127) * 8)) << (byteLen - 127) * 4;
+                x = y;
+                y = (x + n / x) / 2;
             }
 
-            for (; ; )
-            {
-                var root2 = value / root + root >> 1;
-                if ((root2 == root || root2 == root + 1) && IsSqrt(value, root)) return root;
-                root = value / root2 + root2 >> 1;
-                if ((root == root2 || root == root2 + 1) && IsSqrt(value, root2)) return root2;
-            }
+            return x;
         }
 
-        public static bool IsSqrt(BigInteger value, BigInteger root)
+        public static BigInteger SqrtCeiling(BigInteger n)
         {
-            var lowerBound = root * root;
+            if (n == 0)
+                return BigInteger.Zero;
+            if (n == 1)
+                return BigInteger.One;
 
-            return value >= lowerBound && value <= lowerBound + (root << 1);
+            BigInteger result = n;
+            BigInteger prevResult;
+
+            do
+            {
+                prevResult = result;
+                result = (prevResult + n / prevResult) / 2;
+            } while (result < prevResult);
+
+            if (prevResult * prevResult == n)
+                return prevResult;
+            else if (prevResult * prevResult < n)
+                return prevResult + 1;
+            else
+                return prevResult;
         }
 
 

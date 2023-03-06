@@ -22,8 +22,8 @@ namespace Krypto.Krypto // Note: actual namespace depends on the project name.
 
         static void Main(string[] args)
         {
-            Testing.FactorTesting(2, 100, FactorizationSelection.BabyStepGiantStep, "testingBSG");
-
+            //Testing.FactorTesting(2, 100, FactorizationSelection.BabyStepGiantStep, "testingBSG");
+            CryptoOperations.sqrttest();
         }
     }
 }
