@@ -742,25 +742,36 @@ namespace Krypto.Operations.Crypto_Operations
         }
 
 
-        private static BigInteger[] quadraticSieve(BigInteger n)
+        public static BigInteger[] quadraticSieve(BigInteger n)
         {
-            BigInteger B = Intermediaries.Sqrt(n);//smoothness bound
+            BigInteger B = (BigInteger)Double.Pow(double.E, (double)Intermediaries.Sqrt((BigInteger)BigInteger.Log(n) * (BigInteger)BigInteger.Log(n)));
+            B = (BigInteger)Double.Pow((double)B,1/Math.Sqrt(2));
+            BigInteger smoothnessBound = GetBiggest(LECF(B));
 
-            BigInteger[] BsmoothNumbers = generateB_smoothNumbers(B);
-            BigInteger[] Bi = getBi(BsmoothNumbers, n);
+            BigInteger[] BsmoothNumbers = generateB_smoothNumbers(smoothnessBound);
+            BigInteger[] Bi = GetBi(BsmoothNumbers, n);
+            List<BigInteger[]> vectors = GetExponentVectors(Bi);
+            for (int i = 0; i < BsmoothNumbers.Length; i++)
+            {
+                Console.WriteLine(BsmoothNumbers[i]);
+            }
+
 
             throw new NotImplementedException();
         }
+
+
+
 
         private static BigInteger[] generateB_smoothNumbers(BigInteger smoothnessBound)
         {
             BigInteger[] factors;
             List<BigInteger> numbers = new List<BigInteger>();
 
-            for (int i = 2; i < smoothnessBound; i++)
+            for (int i = 2; i < BigInteger.Pow(smoothnessBound,2); i++)
             {
                 factors = LECF(i);
-                if (getBiggest(factors) < smoothnessBound)
+                if (GetBiggest(factors) < smoothnessBound)
                 {
                     numbers.Add(i);
                 }
@@ -776,7 +787,7 @@ namespace Krypto.Operations.Crypto_Operations
             return result;
         }
 
-        private static BigInteger getBiggest(BigInteger[] input)
+        private static BigInteger GetBiggest(BigInteger[] input)
         {
             BigInteger res = input[0];
             if (input.Length == 1)
@@ -794,7 +805,7 @@ namespace Krypto.Operations.Crypto_Operations
             return res;
         }
 
-        private static BigInteger[] getBi(BigInteger[] input, BigInteger modulus)
+        private static BigInteger[] GetBi(BigInteger[] input, BigInteger modulus)
         {
             BigInteger[] bis = new BigInteger[input.Length];
 
@@ -806,63 +817,67 @@ namespace Krypto.Operations.Crypto_Operations
             return bis;
         }
         
-        private static List<BigInteger[]> getExponentVectors(BigInteger[] bi)
+        private static List<BigInteger[]> GetExponentVectors(BigInteger[] bi)
         {
             List<BigInteger[]> vectors = new List<BigInteger[]>();
             for (int i = 0; i < bi.Length; i++)
             {
-                
-
+                vectors.Add(GetExponents(LECF(bi[i])));
             }
-            throw new NotImplementedException();
+            return vectors;
         }
 
-        private static BigInteger[] getExponents(BigInteger[] factors)
+        private static BigInteger[] GetExponents(BigInteger[] factors)
         {
             Array.Sort(factors);
             List<BigInteger> list = new List<BigInteger>(factors);
 
             HashSet <BigInteger> hashSet = new HashSet<BigInteger>(factors);
 
+            BigInteger[] uniques = new BigInteger[hashSet.Count];
+            hashSet.CopyTo(uniques);
+
+            BigInteger[] result = new BigInteger[uniques.Length];
+            if (hashSet.Count == list.Count)
+            {
+                for (int i = 0; i < result.Length; i++)
+                {
+                    result[i] = 1;
+                }
+
+                return result;
+            }
+
             for (int i = 0; i < hashSet.Count; i++)
             {
-                var number = factors[i];
+                var number = uniques[i];
+                var exponent = CountOccurrences(factors, number);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+                result[i] = exponent % 2;
 
             }
-            throw new NotImplementedException();
+
+            return result;
 
         }
 
-
-        public static void sqrttest()
+        private static int CountOccurrences(BigInteger[] array, BigInteger element)
         {
-            for (int i = 0; i < 10000000; i++)
+            int count = 0;
+            for (int i = 0; i < array.Length; i++)
             {
-                if (Intermediaries.SqrtCeiling(i) != (BigInteger)Math.Ceiling(Math.Sqrt(i)))
+                if (array[i] == element)
                 {
-                    Console.WriteLine(i);
+                    count++;
                 }
             }
+            return count;
         }
-        
+
 
     }
 
-    internal class Intermediaries
+    internal static class Intermediaries
     {
         private static Random random = new Random();
 
